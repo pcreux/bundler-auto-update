@@ -82,5 +82,20 @@ describe GemUpdater do
     end
   end # describe "#update"
 
+  describe "updatable?" do
+    [ "1.0.0", "> 1.0.0", "~> 1.0.0", "1.0", ].each do |version|
+      it "should be updatable when version is #{version}" do
+        dependency = Dependency.new('rails', version)
+        GemUpdater.new(dependency, nil, nil).should be_updatable
+      end
+    end
+
+    it "should be updatable when version is < 1.0.0" do
+      dependency = Dependency.new('rails', '< 1.0.0')
+      GemUpdater.new(dependency, nil, nil).should_not be_updatable
+    end
+  end
+
+
 end
 

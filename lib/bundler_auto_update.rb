@@ -84,6 +84,11 @@ module Bundler
         end
       end
 
+      # @return true when the gem has a fixed version.
+      def updatable?
+        !!(gem.version =~ /^~?>? ?\d+\.\d+(\.\d+)?$/)
+      end
+
       private
 
       # Update gem version in Gemfile.
@@ -109,11 +114,6 @@ module Bundler
           Logger.log_indent "Test suite failed to run."
           false
         end
-      end
-
-      # @return true when the gem has a fixed version.
-      def updatable?
-        gem.version =~ /^\d+\.\d+\.\d+$/
       end
 
       def commit_new_version
@@ -230,7 +230,8 @@ module Bundler
       def initialize(name, version = nil, options = nil)
         @name, @version, @options = name, version, options
 
-        @major, @minor, @patch = version.split('.') if version
+        # TODO: enhance support of > and ~> in versions
+        @major, @minor, @patch = version[/\d+\.\d+(\.\d+)?/].split('.') if version
       end
 
       # Return last version scoped at :version_type:.
