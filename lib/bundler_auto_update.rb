@@ -133,7 +133,7 @@ module Bundler
       # Regex that matches a gem definition line.
       #
       # @return [RegEx] matching [_, name, _, version, _, options]
-      def gem_line_regex(gem_name = '(\w+)')
+      def gem_line_regex(gem_name = '([\w-]+)')
         /^\s*gem\s*['"]#{gem_name}['"]\s*(,\s*['"](.+)['"])?\s*(,\s*(.*))?\n?$/
       end
 

@@ -5,7 +5,9 @@ describe Gemfile do
 source :rubygems
 
 gem 'rails',  "3.0.0"
- gem 'rake' , '< 0.9' 
+group :test do
+  gem 'shoulda-matchers' , '~> 0.9' 
+end
 gem 'mysql', :git => "git://...."
 EOF
 }
@@ -40,8 +42,8 @@ EOF
       describe "second gem" do
         subject { gemfile.gems[1] }
 
-        its(:name) { should == 'rake' }
-        its(:version) { should == '< 0.9' }
+        its(:name) { should == 'shoulda-matchers' }
+        its(:version) { should == '~> 0.9' }
         its(:options) { should be_nil }
       end
 
