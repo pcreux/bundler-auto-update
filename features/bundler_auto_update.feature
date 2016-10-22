@@ -54,6 +54,7 @@ Feature: Auto update Gemfile
       Hello
         - Test suite ran successfully.
         - Committing changes
+          > git status | grep 'Gemfile.lock' > /dev/null
           > git commit Gemfile Gemfile.lock -m 'Auto update dmg to version 0.0.4'
       """
     When I run `git log`

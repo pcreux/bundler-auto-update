@@ -119,7 +119,7 @@ module Bundler
       def commit_new_version
         Logger.log_indent "Committing changes"
 
-        files_to_commit = if CommandRunner.system "git status | grep 'Gemfile.lock'"
+        files_to_commit = if CommandRunner.system "git status | grep 'Gemfile.lock' > /dev/null"
                             "Gemfile Gemfile.lock"
                           else
                             "Gemfile"
