@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rspec", '~> 3.5'
   s.add_development_dependency "cucumber"
-  s.add_development_dependency "aruba", "0.4.6"
+  s.add_development_dependency "aruba", "~> 0.14.2"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
