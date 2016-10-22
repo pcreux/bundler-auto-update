@@ -7,12 +7,12 @@ Feature: Auto update Gemfile
   Background:
     Given a file named "Gemfile" with:
     """
-    source "http://rubygems.org"
+    source "https://rubygems.org"
 
     gem 'dmg', '0.0.2'
     """
     When I run `bundle install`
-    Then the output should contain "dmg (0.0.2) "
+    Then the output should contain "dmg 0.0.2"
     Then the output should contain "complete!"
 
 
