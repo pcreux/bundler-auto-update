@@ -18,7 +18,13 @@ Feature: Auto update Gemfile
     When I run `git add .`
     When I run `git commit -a -m "Initial Commit"`
 
-  Scenario: Auto Update
+  Scenario: Auto Update with failing default command
+    Given a file named "Rakefile" with:
+    """
+    task :default do
+      raise 'Failing!'
+    end
+    """
     When I run `bundle-auto-update`
     Then the output should contain:
       """
@@ -38,7 +44,7 @@ Feature: Auto update Gemfile
           > git checkout Gemfile Gemfile.lock
       """
 
-  Scenario: Auto Update with custom command
+  Scenario: Auto Update with succeeding custom command
     When I run `bundle-auto-update -c echo Hello`
     Then the output should contain:
       """
