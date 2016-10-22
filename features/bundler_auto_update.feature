@@ -14,7 +14,9 @@ Feature: Auto update Gemfile
     When I run `bundle install`
     Then the output should contain "dmg 0.0.2"
     Then the output should contain "complete!"
-
+    When I run `git init`
+    When I run `git add .`
+    When I run `git commit -a -m "Initial Commit"`
 
   Scenario: Auto Update
     When I run `bundle-auto-update`
@@ -37,10 +39,6 @@ Feature: Auto update Gemfile
       """
 
   Scenario: Auto Update with custom command
-    When I run `git init`
-    When I run `git add .`
-    When I run `git commit -a -m "Initial Commit"`
-
     When I run `bundle-auto-update -c echo Hello`
     Then the output should contain:
       """
