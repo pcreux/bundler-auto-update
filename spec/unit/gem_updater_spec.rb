@@ -55,7 +55,7 @@ describe GemUpdater do
     context "when new version" do
       before do
         allow(gemfile).to receive(:available_versions_for).with('rails').
-          and_return %w(4.1.1 4.1.0 4.0.1 4.0.0 3.1.1 3.1.0 3.0.1 3.0.0)
+          and_return %w(4.1.1 4.1.0 4.0.1 4.0.0 3.10.0 3.9.1 3.9.0 3.1.1 3.1.0 3.0.1 3.0.0)
       end
 
       context "when tests pass" do
@@ -110,6 +110,22 @@ describe GemUpdater do
         before do
           allow(gemfile).to receive(:locked_version_for).with('rails').
             and_return '3.1.0'
+        end
+
+        it 'should not attempt to update' do
+          expect(gem_updater).not_to receive :update_gemfile
+          expect(gem_updater).not_to receive :run_test_suite
+
+          gem_updater.update(:patch)
+        end
+      end
+
+      context "when new version below locked version, but not alphabetically" do
+        let(:gem) { Dependency.new('rails', '> 3.9.0', nil) }
+
+        before do
+          allow(gemfile).to receive(:locked_version_for).with('rails').
+            and_return '3.10.0'
         end
 
         it 'should not attempt to update' do

@@ -68,7 +68,7 @@ module Bundler
         new_version = last_version(version_type) 
         locked_version = gemfile.locked_version_for(gem.name)
 
-        if new_version <= locked_version
+        if Gem::Version.new(new_version) <= Gem::Version.new(locked_version)
           Logger.log_indent "Current gem already at latest #{version_type} version. Passing this update."
 
           return true
