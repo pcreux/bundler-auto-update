@@ -132,7 +132,7 @@ module Bundler
 
       def revert_to_previous_version
         Logger.log_indent "Reverting changes"
-        CommandRunner.system "git checkout Gemfile Gemfile.lock"
+        CommandRunner.system "git checkout #{files_to_commit}"
         gemfile.reload!
       end
     end # class GemUpdater
