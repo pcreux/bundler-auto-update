@@ -119,12 +119,15 @@ module Bundler
       def commit_new_version
         Logger.log_indent "Committing changes"
 
-        files_to_commit = if CommandRunner.system "git status | grep 'Gemfile.lock' > /dev/null"
-                            "Gemfile Gemfile.lock"
-                          else
-                            "Gemfile"
-                          end
         CommandRunner.system "git commit #{files_to_commit} -m 'Auto update #{gem.name} to version #{gem.version}'"
+      end
+
+      def files_to_commit
+        @files_to_commit ||= if CommandRunner.system "git status | grep 'Gemfile.lock' > /dev/null"
+                               "Gemfile Gemfile.lock"
+                             else
+                               "Gemfile"
+                             end
       end
 
       def revert_to_previous_version
