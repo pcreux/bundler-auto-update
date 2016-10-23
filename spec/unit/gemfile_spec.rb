@@ -14,8 +14,8 @@ EOF
 
   let(:gemfile) do
     Gemfile.new.tap { |gemfile|
-      gemfile.stub!(:read) { content }
-      gemfile.stub!(:write) { true }
+      allow(gemfile).to receive(:read) { content }
+      allow(gemfile).to receive(:write) { true }
     }
   end
 
@@ -25,34 +25,70 @@ EOF
     context "when emtpy Gemfile" do
       let(:content) { "" }
 
-      it { should == [] }
+      it { is_expected.to eq([]) }
     end
 
     context "when Gemfile contains 3 gems" do
-      its(:size) { should == 3 }
+      describe '#size' do
+        subject { super().size }
+        it { is_expected.to eq(3) }
+      end
 
       describe "first gem" do
         subject { gemfile.gems.first }
 
-        its(:name) { should == 'rails' }
-        its(:version) { should == '3.0.0' }
-        its(:options) { should be_nil }
+        describe '#name' do
+          subject { super().name }
+          it { is_expected.to eq('rails') }
+        end
+
+        describe '#version' do
+          subject { super().version }
+          it { is_expected.to eq('3.0.0') }
+        end
+
+        describe '#options' do
+          subject { super().options }
+          it { is_expected.to be_nil }
+        end
       end
 
       describe "second gem" do
         subject { gemfile.gems[1] }
 
-        its(:name) { should == 'shoulda-matchers' }
-        its(:version) { should == '~> 0.9' }
-        its(:options) { should be_nil }
+        describe '#name' do
+          subject { super().name }
+          it { is_expected.to eq('shoulda-matchers') }
+        end
+
+        describe '#version' do
+          subject { super().version }
+          it { is_expected.to eq('~> 0.9') }
+        end
+
+        describe '#options' do
+          subject { super().options }
+          it { is_expected.to be_nil }
+        end
       end
 
       describe "last gem" do
         subject { gemfile.gems[2] }
 
-        its(:name) { should == 'mysql' }
-        its(:version) { should be_nil }
-        its(:options) { should == ':git => "git://...."' }
+        describe '#name' do
+          subject { super().name }
+          it { is_expected.to eq('mysql') }
+        end
+
+        describe '#version' do
+          subject { super().version }
+          it { is_expected.to be_nil }
+        end
+
+        describe '#options' do
+          subject { super().options }
+          it { is_expected.to eq(':git => "git://...."') }
+        end
       end
     end
   end # describe "#gems"
@@ -61,27 +97,27 @@ EOF
     it "should update the gem version in the Gemfile" do
       gemfile.update_gem(Dependency.new('rails', '3.1.0'))
 
-      gemfile.content.should include(%{gem 'rails',  "3.1.0"})
+      expect(gemfile.content).to include(%{gem 'rails',  "3.1.0"})
     end
 
     it "should write the new Gemfile" do
-      gemfile.should_receive(:write)
+      expect(gemfile).to receive(:write)
 
       gemfile.update_gem(Dependency.new('rails', '3.1.0'))
     end
 
     it "should run 'bundle install' against the gem" do
-      CommandRunner.should_receive(:system).with("bundle install") { true }
-      CommandRunner.should_not_receive(:system).with("bundle update rails")
+      expect(CommandRunner).to receive(:system).with("bundle install") { true }
+      expect(CommandRunner).not_to receive(:system).with("bundle update rails")
 
       gemfile.update_gem(Dependency.new('rails', '3.1.0'))
     end
 
     it "should run 'bundle update' against the gem when bundle install fails because a gem version is locked" do
-      CommandRunner.should_receive(:system).with("bundle install").and_return false
-      CommandRunner.should_receive(:system).with("bundle update rails").and_return true
+      expect(CommandRunner).to receive(:system).with("bundle install").and_return false
+      expect(CommandRunner).to receive(:system).with("bundle update rails").and_return true
 
-      gemfile.update_gem(Dependency.new('rails', '3.1.0')).should == true
+      expect(gemfile.update_gem(Dependency.new('rails', '3.1.0'))).to eq(true)
     end
   end
 end

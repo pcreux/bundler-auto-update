@@ -7,16 +7,24 @@ Feature: Auto update Gemfile
   Background:
     Given a file named "Gemfile" with:
     """
-    source "http://rubygems.org"
+    source "https://rubygems.org"
 
     gem 'dmg', '0.0.2'
     """
     When I run `bundle install`
-    Then the output should contain "dmg (0.0.2) "
+    Then the output should contain "dmg 0.0.2"
     Then the output should contain "complete!"
+    When I run `git init`
+    When I run `git add .`
+    When I run `git commit -a -m "Initial Commit"`
 
-
-  Scenario: Auto Update
+  Scenario: Auto Update with failing default command
+    Given a file named "Rakefile" with:
+    """
+    task :default do
+      raise 'Failing!'
+    end
+    """
     When I run `bundle-auto-update`
     Then the output should contain:
       """
@@ -36,11 +44,7 @@ Feature: Auto update Gemfile
           > git checkout Gemfile Gemfile.lock
       """
 
-  Scenario: Auto Update with custom command
-    When I run `git init`
-    When I run `git add .`
-    When I run `git commit -a -m "Initial Commit"`
-
+  Scenario: Auto Update with succeeding custom command
     When I run `bundle-auto-update -c echo Hello`
     Then the output should contain:
       """
@@ -54,6 +58,7 @@ Feature: Auto update Gemfile
       Hello
         - Test suite ran successfully.
         - Committing changes
+          > git status | grep 'Gemfile.lock' > /dev/null
           > git commit Gemfile Gemfile.lock -m 'Auto update dmg to version 0.0.4'
       """
     When I run `git log`

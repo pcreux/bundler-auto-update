@@ -4,7 +4,7 @@ describe Dependency do
   let(:dependency) { Dependency.new 'rails', '2.1.1' }
 
   before do
-    dependency.stub!(:gem_remote_list_output) { <<-EOS
+    allow(dependency).to receive(:gem_remote_list_output) { <<-EOS
 
 ## REMOTE GEMS
 
@@ -16,22 +16,22 @@ EOS
 
   describe "#last_version" do
     it "should be 2.1.2 with :patch" do
-      dependency.last_version(:patch).should == '2.1.2'
+      expect(dependency.last_version(:patch)).to eq('2.1.2')
     end
 
     it "should be 2.3.14 with :minor" do
-      dependency.last_version(:minor).should == '2.3.14'
+      expect(dependency.last_version(:minor)).to eq('2.3.14')
     end
 
     it "should be 3.1.0 with :major" do
-      dependency.last_version(:major).should == '3.1.0'
+      expect(dependency.last_version(:major)).to eq('3.1.0')
     end
 
   end
 
   describe "#available_versions" do
     it "should return an array of available versions" do
-      dependency.available_versions.should == %w(3.1.0 3.0.10 3.0.9 3.0.8 3.0.7 3.0.6 3.0.5 3.0.4 3.0.3 3.0.2 3.0.1 3.0.0 2.3.14 2.3.12 2.3.11 2.3.10 2.3.9 2.3.8 2.3.7 2.3.6 2.3.5 2.3.4 2.3.3 2.3.2 2.2.3 2.2.2 2.1.2 2.1.1 2.1.0 2.0.5 2.0.4 2.0.2 2.0.1 2.0.0 1.2.6 1.2.5 1.2.4 1.2.3 1.2.2 1.2.1 1.2.0 1.1.6 1.1.5 1.1.4 1.1.3 1.1.2 1.1.1 1.1.0 1.0.0 0.14.4 0.14.3 0.14.2 0.14.1 0.13.1 0.13.0 0.12.1 0.12.0 0.11.1 0.11.0 0.10.1 0.10.0 0.9.5 0.9.4 0.9.4 0.9.3 0.9.2 0.9.1 0.9.0 0.8.5 0.8.0)
+      expect(dependency.available_versions).to eq(%w(3.1.0 3.0.10 3.0.9 3.0.8 3.0.7 3.0.6 3.0.5 3.0.4 3.0.3 3.0.2 3.0.1 3.0.0 2.3.14 2.3.12 2.3.11 2.3.10 2.3.9 2.3.8 2.3.7 2.3.6 2.3.5 2.3.4 2.3.3 2.3.2 2.2.3 2.2.2 2.1.2 2.1.1 2.1.0 2.0.5 2.0.4 2.0.2 2.0.1 2.0.0 1.2.6 1.2.5 1.2.4 1.2.3 1.2.2 1.2.1 1.2.0 1.1.6 1.1.5 1.1.4 1.1.3 1.1.2 1.1.1 1.1.0 1.0.0 0.14.4 0.14.3 0.14.2 0.14.1 0.13.1 0.13.0 0.12.1 0.12.0 0.11.1 0.11.0 0.10.1 0.10.0 0.9.5 0.9.4 0.9.4 0.9.3 0.9.2 0.9.1 0.9.0 0.8.5 0.8.0))
     end
   end
 

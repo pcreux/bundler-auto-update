@@ -1,13 +1,8 @@
 require 'bundler/gem_tasks'
+require 'cucumber/rake/task'
+require 'rspec/core/rake_task'
 
-desc "Run specs"
-task :spec do
-  raise unless system 'bundle exec rspec spec'
-end
-
-desc "Run cucumber"
-task :cucumber do
-  raise unless system 'bundle exec cucumber features'
-end
+RSpec::Core::RakeTask.new(:spec)
+Cucumber::Rake::Task.new(:cucumber)
 
 task :default => [:spec, :cucumber]
