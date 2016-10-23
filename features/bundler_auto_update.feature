@@ -41,6 +41,7 @@ Feature: Auto update Gemfile
       """
         - Test suite failed to run.
         - Reverting changes
+          > git status | grep 'Gemfile.lock' > /dev/null
           > git checkout Gemfile Gemfile.lock
       """
 
