@@ -78,6 +78,20 @@ describe GemUpdater do
 
           expect(gem_updater.update(:patch)).to eq(false)
         end
+
+      end
+
+      context "when it fails to upgrade gem and only Gemfile is checked in" do
+        it 'should revert only Gemfile' do
+          expect(gem).to receive(:last_version).with(:patch) { gem.version.next }
+          expect(gem_updater).to receive(:update_gemfile).and_return false
+          expect(CommandRunner).to receive(:system).
+            with("git status | grep 'Gemfile.lock' > /dev/null").and_return false
+          expect(CommandRunner).to receive(:system).
+            with("git checkout Gemfile").and_return false
+
+          gem_updater.update(:patch)
+        end
       end
     end
   end # describe "#update"
