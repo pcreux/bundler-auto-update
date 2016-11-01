@@ -68,6 +68,12 @@ module Bundler
         new_version = last_version(version_type) 
         locked_version = gemfile.locked_version_for(gem.name)
 
+        unless locked_version
+          Logger.log_indent "Current gem not found in the lockfile. Passing this update."
+
+          return true
+        end
+
         if Gem::Version.new(new_version) <= Gem::Version.new(locked_version)
           Logger.log_indent "Current gem already at latest #{version_type} version. Passing this update."
 
@@ -209,7 +215,8 @@ module Bundler
       end
 
       def locked_version_for(gem_name)
-        bundler_definition.specs[gem_name].first.version.to_s
+        spec = bundler_lockfile.specs.find { |it| it.name == gem_name }
+        spec.version.to_s if spec
       end
 
       def available_versions_for(gem_name)
@@ -222,6 +229,10 @@ module Bundler
           Bundler::Definition.build('Gemfile', 'Gemfile.lock', true).tap do |dfn|
             dfn.resolve_remotely!
           end
+      end
+
+      def bundler_lockfile
+        @bundler_lockfile ||= Bundler::LockfileParser.new(File.read 'Gemfile.lock')
       end
 
       private

@@ -135,6 +135,23 @@ describe GemUpdater do
           gem_updater.update(:patch)
         end
       end
+
+      context 'when there is no locked version' do
+        let(:gem) { Dependency.new('rails', '3.0.0', nil) }
+
+        before do
+          allow(gemfile).to receive(:locked_version_for).with('rails').
+            and_return nil
+        end
+
+        it 'should not attempt to update' do
+          expect(gem_updater).not_to receive :update_gemfile
+          expect(gem_updater).not_to receive :run_test_suite
+
+          gem_updater.update(:patch)
+        end
+      end
+
     end
   end # describe "#update"
 
