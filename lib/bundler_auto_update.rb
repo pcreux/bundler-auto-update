@@ -64,7 +64,7 @@ module Bundler
       # @param version_type :patch or :minor or :major
       # @return [Boolean] true on success or when already at latest version
       def update(version_type)
-        new_version = gem.last_version(version_type)
+        new_version = last_version(version_type) 
 
         if new_version == gem.version
           Logger.log_indent "Current gem already at latest #{version_type} version. Passing this update."
@@ -84,9 +84,37 @@ module Bundler
         end
       end
 
+      # Return last version scoped at :version_type:.
+      #
+      # Example: last_version(:patch), returns the last patch version 
+      # for the current major/minor version
+      #
+      # @return [String] last version. Ex: '1.2.3'
+      #
+      def last_version(version_type)
+        case version_type
+        when :patch
+          available_versions.select { |v| v =~ /^#{gem.major}\.#{gem.minor}\D/ }.first
+        when :minor
+          available_versions.select { |v| v =~ /^#{gem.major}\./ }.first
+        when :major
+          available_versions.first
+        else
+          raise "Invalid version_type: #{version_type}"
+        end
+      end
+
       # @return true when the gem has a fixed version.
       def updatable?
         !!(gem.version =~ /^~?>? ?\d+\.\d+(\.\d+)?$/)
+      end
+
+      # Return an ordered array of all available versions.
+      #
+      # @return [Array] of [String].
+      def available_versions
+        the_gem_line = gem_remote_list_output.scan(/^#{gem.name}\s.*$/).first
+        the_gem_line.scan /\d+\.\d+\.\d+/
       end
 
       private
@@ -134,6 +162,10 @@ module Bundler
         Logger.log_indent "Reverting changes"
         CommandRunner.system "git checkout #{files_to_commit}"
         gemfile.reload!
+      end
+
+      def gem_remote_list_output
+        @gem_remote_list_output ||= CommandRunner.run "gem list #{gem.name} -r -a"
       end
     end # class GemUpdater
 
@@ -241,40 +273,6 @@ module Bundler
 
         # TODO: enhance support of > and ~> in versions
         @major, @minor, @patch = version[/\d+\.\d+(\.\d+)?/].split('.') if version
-      end
-
-      # Return last version scoped at :version_type:.
-      #
-      # Example: last_version(:patch), returns the last patch version 
-      # for the current major/minor version
-      #
-      # @return [String] last version. Ex: '1.2.3'
-      #
-      def last_version(version_type)
-        case version_type
-        when :patch
-          available_versions.select { |v| v =~ /^#{major}\.#{minor}\D/ }.first
-        when :minor
-          available_versions.select { |v| v =~ /^#{major}\./ }.first
-        when :major
-          available_versions.first
-        else
-          raise "Invalid version_type: #{version_type}"
-        end
-      end
-
-      # Return an ordered array of all available versions.
-      #
-      # @return [Array] of [String].
-      def available_versions
-        the_gem_line = gem_remote_list_output.scan(/^#{name}\s.*$/).first
-        the_gem_line.scan /\d+\.\d+\.\d+/
-      end
-
-      private
-
-      def gem_remote_list_output
-        @gem_remote_list_output ||= CommandRunner.run "gem list #{name} -r -a"
       end
     end # class Dependency
 
