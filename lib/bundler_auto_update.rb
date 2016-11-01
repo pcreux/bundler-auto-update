@@ -66,8 +66,9 @@ module Bundler
       # @return [Boolean] true on success or when already at latest version
       def update(version_type)
         new_version = last_version(version_type) 
+        locked_version = gemfile.locked_version_for(gem.name)
 
-        if new_version == gem.version
+        if new_version <= locked_version
           Logger.log_indent "Current gem already at latest #{version_type} version. Passing this update."
 
           return true
@@ -205,6 +206,10 @@ module Bundler
       # Reload Gemfile content
       def reload!
         @content = read
+      end
+
+      def locked_version_for(gem_name)
+        bundler_definition.specs[gem_name].first.version.to_s
       end
 
       def available_versions_for(gem_name)

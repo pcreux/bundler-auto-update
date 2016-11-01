@@ -33,9 +33,18 @@ describe GemUpdater do
     let(:gem) { Dependency.new('rails', '3.0.0', nil) }
     let(:gem_updater) { GemUpdater.new(gem, gemfile, test_command) }
 
+    before do
+      allow(gemfile).to receive(:locked_version_for).with('rails').
+        and_return '3.0.0'
+    end
+
     context "when no new version" do
+      before do
+        allow(gemfile).to receive(:available_versions_for).with('rails').
+          and_return %w(3.0.0)
+      end
+
       it "should return" do
-        expect(gem_updater).to receive(:last_version).with(:patch) { gem.version }
         expect(gem_updater).not_to receive :update_gemfile
         expect(gem_updater).not_to receive :run_test_suite
 
@@ -44,9 +53,13 @@ describe GemUpdater do
     end
 
     context "when new version" do
+      before do
+        allow(gemfile).to receive(:available_versions_for).with('rails').
+          and_return %w(4.1.1 4.1.0 4.0.1 4.0.0 3.1.1 3.1.0 3.0.1 3.0.0)
+      end
+
       context "when tests pass" do
         it "should commit new version and return true" do
-          expect(gem_updater).to receive(:last_version).with(:patch) { gem.version.next }
           expect(gem_updater).to receive(:update_gemfile).and_return true
           expect(gem_updater).to receive(:run_test_suite).and_return true
           expect(gem_updater).to receive(:commit_new_version).and_return true
@@ -58,7 +71,6 @@ describe GemUpdater do
 
       context "when tests do not pass" do
         it "should revert to previous version and return false" do
-          expect(gem_updater).to receive(:last_version).with(:patch) { gem.version.next }
           expect(gem_updater).to receive(:update_gemfile).and_return true
           expect(gem_updater).to receive(:run_test_suite).and_return false
           expect(gem_updater).not_to receive(:commit_new_version)
@@ -70,7 +82,6 @@ describe GemUpdater do
 
       context "when it fails to upgrade gem" do
         it "should revert to previous version and return false" do
-          expect(gem_updater).to receive(:last_version).with(:patch) { gem.version.next }
           expect(gem_updater).to receive(:update_gemfile).and_return false
           expect(gem_updater).not_to receive(:run_test_suite)
           expect(gem_updater).not_to receive(:commit_new_version)
@@ -83,12 +94,27 @@ describe GemUpdater do
 
       context "when it fails to upgrade gem and only Gemfile is checked in" do
         it 'should revert only Gemfile' do
-          expect(gem_updater).to receive(:last_version).with(:patch) { gem.version.next }
           expect(gem_updater).to receive(:update_gemfile).and_return false
           expect(CommandRunner).to receive(:system).
             with("git status | grep 'Gemfile.lock' > /dev/null").and_return false
           expect(CommandRunner).to receive(:system).
             with("git checkout Gemfile").and_return false
+
+          gem_updater.update(:patch)
+        end
+      end
+
+      context 'when new version is below locked version' do
+        let(:gem) { Dependency.new('rails', '> 3.0.0', nil) }
+
+        before do
+          allow(gemfile).to receive(:locked_version_for).with('rails').
+            and_return '3.1.0'
+        end
+
+        it 'should not attempt to update' do
+          expect(gem_updater).not_to receive :update_gemfile
+          expect(gem_updater).not_to receive :run_test_suite
 
           gem_updater.update(:patch)
         end
