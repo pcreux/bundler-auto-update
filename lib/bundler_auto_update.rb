@@ -1,4 +1,5 @@
 require "bundler_auto_update/version"
+require 'bundler'
 
 module Bundler
   module AutoUpdate
@@ -113,8 +114,7 @@ module Bundler
       #
       # @return [Array] of [String].
       def available_versions
-        the_gem_line = gem_remote_list_output.scan(/^#{gem.name}\s.*$/).first
-        the_gem_line.scan /\d+\.\d+\.\d+/
+        gemfile.available_versions_for(gem.name)
       end
 
       private
@@ -205,6 +205,18 @@ module Bundler
       # Reload Gemfile content
       def reload!
         @content = read
+      end
+
+      def available_versions_for(gem_name)
+        dep = Bundler::Dependency.new(gem_name, nil)
+        bundler_definition.index.search(dep).map(&:version).sort.reverse.map(&:to_s)
+      end
+
+      def bundler_definition
+        @bundler_definition ||=
+          Bundler::Definition.build('Gemfile', 'Gemfile.lock', true).tap do |dfn|
+            dfn.resolve_remotely!
+          end
       end
 
       private
